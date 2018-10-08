@@ -1,0 +1,16 @@
+body {
+  padding: 0;
+  margin: 0;
+  background: black;
+}
+.container {
+  width: 100vw;
+}
+.content {
+  width: 600px;
+  margin: auto;
+}
+canvas {
+  display: block;
+  cursor: none;
+}
