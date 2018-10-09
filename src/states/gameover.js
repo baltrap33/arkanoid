@@ -6,7 +6,7 @@ class Menu extends Phaser.State {
 
   create() {
     // add background image
-    this.background = this.game.add.sprite(0,0,'background');
+    this.background = this.game.add.sprite(0,0,'sky');
     this.background.height = this.game.world.height;
     this.background.width = this.game.world.width;
 
@@ -15,8 +15,6 @@ class Menu extends Phaser.State {
       font: '42px Arial', fill: '#ffffff', align: 'center'
     });
     this.gameoverText.anchor.set(0.5);
-
-    this.input.onDown.add(this.onInputDown, this);
 
     // prevent accidental click-thru by not allowing state transition for a short time
     this.canContinueToNextState = false;
@@ -37,7 +35,11 @@ class Menu extends Phaser.State {
     this.game.global.score = 0;
   }
 
-  update() {}
+  update() {
+    if (this.input.keyboard.isDown(Phaser.Keyboard.ENTER)){
+      this.onInputDown();
+    }
+  }
 
   onInputDown() {
     if(this.canContinueToNextState){
