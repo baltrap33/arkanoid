@@ -6,6 +6,8 @@ class Ball extends Phaser.Sprite {
         // set size
         this.scale.set(1.1);
         this.anchor.set(0.5);
+        // speed 400 easy // 750 hard
+        this.speed = 450;
 
         this.checkWorldBounds = true;
         this.game.physics.enable(this, Phaser.Physics.ARCADE);
@@ -19,11 +21,19 @@ class Ball extends Phaser.Sprite {
 
     start(vX, vY) {
         if (this.ballOnPaddle) {
+            let angle = 250 + Math.floor(Math.random()*40);
+            let radian = angle * Math.PI / 180;
             this.ballOnPaddle = false;
-            this.body.velocity.y = vY;
-            this.body.velocity.x = vX;
+            this.body.velocity.y = Math.sin(radian) * this.speed;
+            this.body.velocity.x = Math.cos(radian) * this.speed;
             this.animations.play('spin');
         }
+    }
+    changeVelocity (){
+        let angle = 250 + Math.floor(Math.random()*40);
+        let radian = angle * Math.PI / 180;
+        this.body.velocity.y = Math.sin(radian) * this.speed;
+        this.body.velocity.x = Math.cos(radian) * this.speed;
     }
     stop(paddle) {
         if (!this.ballOnPaddle) {
