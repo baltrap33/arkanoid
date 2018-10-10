@@ -18,8 +18,13 @@ npm start
     Modifier le code pour créer un mur de briques dynamiquement selon un tableau (Array);
     
 5 - personnaliser le jeu en ajoutant :
+
     * un menu de régles du jeu
+    
     * plusieurs niveaux
+    
     * des ennemis
+    
     * des options de jeu
+    
     * des bonus
