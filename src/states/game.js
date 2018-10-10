@@ -1,52 +1,113 @@
-import Crosshairs from '../prefabs/crosshairs';
-import Target from '../prefabs/target';
+import Paddle from '../prefabs/paddle';
+import Ball from '../prefabs/ball';
 
 class Game extends Phaser.State {
 
   constructor() {
     super();
   }
-  
+
   create() {
-    //add background image
-    this.background = this.game.add.sprite(0,0,'background');
+
+    this.background = this.game.add.sprite(0, 0, 'sky');
     this.background.height = this.game.world.height;
     this.background.width = this.game.world.width;
 
+    this.game.physics.startSystem(Phaser.Physics.ARCADE);
+    this.game.physics.arcade.checkCollision.down = false;
 
-    //setup UI
-    this.countdownText = this.add.text(this.game.world.centerX, 0, '', {
-      font: '40px Arial', fill: '#ffffff', align: 'center'
-    });
-    this.countdownText.anchor.set(0.5,0);
 
-    //set up click listeners
-    this.game.input.onDown.add(this.shoot, this);
+    this.bricks = this.game.add.group();
+    this.bricks.enableBody = true;
+    this.bricks.physicsBodyType = Phaser.Physics.ARCADE;
+    var brick;
+    for (let y = 0; y < 4; y++) {
+      for (let x = 0; x < 15; x++) {
+        brick = this.bricks.create(30 + (x * 36), 100 + (y * 52), 'breakout', 'brick_' + (y + 1) + '_1.png');
+        brick.body.bounce.set(1);
+        brick.body.immovable = true;
+      }
+    }
 
-    //setup audio
-    this.gunshot = this.game.add.audio('gunshot');
 
-    //setup prefabs
-    this.crosshairs = new Crosshairs(this.game);
-    this.target = new Target(this.game,this.game.world.centerX,this.game.world.centerY);
-    this.game.add.existing(this.crosshairs);
-    this.game.add.existing(this.target);
+    this.paddle = new Paddle(this.game, (this.game.world.width) / 2, (this.game.world.height - 42));
+    this.ball = new Ball(this.game, this.paddle.x - 8, this.paddle.body.y - 16);
 
-    //setup a timer to end the game
-    this.endGameTimer = this.game.time.create();
-    this.endGameTimer.add(Phaser.Timer.SECOND * 15, this.endGame,this);
-    this.endGameTimer.start();
+    this.lives = 3;
+    this.livesText = this.game.add.text(25, this.game.height - 30, 'vies: ' + this.lives, { font: "20px Arial", fill: "#ffffff", align: "left" });
+    this.score = this.game.global.score;
+    this.scoreText = this.game.add.text(this.game.width / 2, this.game.height - 30, 'score: ' + this.score, { font: "20px Arial", fill: "#ffffff", align: "left" });
+
+    this.ball.events.onOutOfBounds.add(this.ballLost, this);
   }
 
-  shoot(click){
-    this.gunshot.play();
+  releaseBall(velocityX, velocityY) {
+    velocityX = velocityX || -100;
+    velocityY = velocityY || -400;
+    this.ball.start(velocityX, velocityY);
   }
 
   update() {
-    this.countdownText.setText( (this.endGameTimer.duration/1000).toFixed(1));
+
+    if (this.ball.ballOnPaddle) {
+      this.ball.body.x = this.paddle.x - 8;
+      this.ball.body.y = this.paddle.body.y - 16;
+    }
+
+    this.game.physics.arcade.collide(this.ball, this.paddle, this.ballHitPaddle, null, this);
+
+    this.game.physics.arcade.collide(this.ball, this.bricks, this.ballHitBrick, null, this);
+
+    if ((this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) || this.game.input.keyboard.isDown(Phaser.Keyboard.ENTER)) && this.ball.ballOnPaddle) {
+      this.releaseBall();
+    }
+  }
+
+  ballLost() {
+    this.ball.stop(this.paddle);
+    this.paddle.setSpeed(7);
+    this.lives -= 1;
+    this.livesText.text = 'vies: ' + this.lives;
+    if (this.lives === 0) {
+      this.endGame();
+    }
+  }
+
+  changeScore(pt) {
+    this.score += pt;
+    this.scoreText.text = 'score: ' + this.score;
+  }
+
+  ballHitPaddle(_ball, _paddle) {
+    var diff = 0;
+    if (_ball.x < _paddle.x) {
+      diff = _paddle.x - _ball.x;
+      _ball.body.velocity.x = (-10 * diff / 1.5);
+    } else if (_ball.x > _paddle.x) {
+      diff = _ball.x - _paddle.x;
+      _ball.body.velocity.x = (10 * diff / 1.5);
+    } else {
+      _ball.body.velocity.x = 2 + Math.random() * 8;
+    }
+    if (!this.ball.ballOnPaddle) {
+      _paddle.increaseSpeed(0.5);
+      this.changeScore(3);
+    }
+  }
+  ballHitBrick(_ball, _brick) {
+    _brick.kill();
+    this.changeScore(10);
+    if (this.bricks.countLiving() == 0) {
+      this.changeScore(1000);
+      this.lives += 1;
+      this.ball.ballOnPaddle = true;
+      this.ball.stop(this.paddle);
+      this.bricks.callAll('revive');
+    }
   }
 
   endGame() {
+    this.game.global.score = this.score;
     this.game.state.start('gameover');
   }
 

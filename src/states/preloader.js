@@ -17,15 +17,11 @@ class Preloader extends Phaser.State {
   }
 
   loadResources() {
-    this.game.load.image('background','assets/bg_wood.png');
-    this.game.load.image('crosshairs', 'assets/crosshair_red_small.png');
-    this.game.load.image('text_go', 'assets/text_go.png');
-    this.game.load.image('text_ready', 'assets/text_ready.png');
-
-    this.game.load.spritesheet('target', 'assets/target.png',128.66,128);
-
-    this.game.load.audio('gunshot','assets/gunshot.wav');
-    this.game.load.audio('ding','assets/ding.wav');
+    this.game.load.atlas('breakout','assets/breakout.png','assets/breakout.json');
+    this.game.load.image('sky', 'assets/starfield.jpg');
+    this.game.load.image('paddle', 'assets/paddle.png');
+    
+    this.game.load.image('ball', 'assets/ball.png');
   }
 
   onLoadComplete() {

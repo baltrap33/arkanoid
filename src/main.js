@@ -5,7 +5,7 @@ import Preloader from './states/preloader';
 import Gameover from './states/gameover';
 
 
-const game = new Phaser.Game(600, 500, Phaser.AUTO, 'arkanoid-game');
+const game = new Phaser.Game(600, 800, Phaser.AUTO, 'arkanoid-game');
 
 game.state.add('boot', new Boot());
 game.state.add('game', new Game());
