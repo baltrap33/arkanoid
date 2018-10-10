@@ -10,7 +10,7 @@ npm start
 # TP 
 1 - utiliser vos connaissances pour identifier la création du paddle et de la balle
 
-2 - comment est réaliser la 'skin' de la balle, qu'elle est sa particularité ?
+2 - comment est réalisée la 'skin' de la balle, qu'elle est sa particularité ?
 
 3 - identifier les endroits dans le code qui captent l'appuie des touches (gauche, droite, espace et entrée)
 
