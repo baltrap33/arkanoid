@@ -68,7 +68,7 @@ class Game extends Phaser.State {
   createBalls() {
     this.tabBall = [];
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 1; i++) {
       let ball = new Ball(this.game, this.paddle.x - 8, this.paddle.body.y - 16);
       ball.idGame = (new Date()).getTime();
       this.tabBall.push(ball);
@@ -79,7 +79,7 @@ class Game extends Phaser.State {
     }
   }
   lanceBonus() {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       let ball = new Ball(this.game, this.paddle.x - 8, this.paddle.body.y - 16);
       ball.idGame = (new Date()).getTime();
       console.log(ball);
@@ -91,6 +91,7 @@ class Game extends Phaser.State {
     //console.log('bonus');
     //console.log(this.tabBall)
   }
+  
   modeEtoile() {
     var me = this;
     setInterval(function interval() {
@@ -172,6 +173,7 @@ class Game extends Phaser.State {
       this.endGame();
     }
   }
+  
 
   changeScore(pt) {
 
