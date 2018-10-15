@@ -34,10 +34,19 @@ class Ball extends Phaser.Sprite {
         }
     }
     changeVelocity (){
+        
         let angle = 250 + Math.floor(Math.random()*40);
         let radian = angle * Math.PI / 180;
         this.body.velocity.y = Math.sin(radian) * this.speed;
         this.body.velocity.x = Math.cos(radian) * this.speed;
+    }
+    changeVitesse (){
+        this.body.velocity.y *= 1.7;
+        this.body.velocity.x *= 1.7;
+    }
+    baisseVitesse (){
+        this.body.velocity.y /= 1.7;
+        this.body.velocity.x /= 1.7;
     }
     stop(paddle) {
         if (!this.ballOnPaddle) {

@@ -29,10 +29,10 @@ class Game extends Phaser.State {
       }
     }*/
     var tabBrick = [[1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1],
-                    [0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0],
-                    [0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0],
-                    [0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0],
-                    [1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1]];
+    [0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0],
+    [0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0],
+    [0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0],
+    [1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1]];
 
 
     for (let i = 0; i < tabBrick.length; i++) {
@@ -49,8 +49,8 @@ class Game extends Phaser.State {
 
 
     this.paddle = new Paddle(this.game, (this.game.world.width) / 2, (this.game.world.height - 42));
-    
-   
+
+
     this.createBalls();
     //this.ball = new Ball(this.game, this.paddle.x - 8, this.paddle.body.y - 16);
 
@@ -58,32 +58,70 @@ class Game extends Phaser.State {
     this.livesText = this.game.add.text(25, this.game.height - 30, 'vies: ' + this.lives, { font: "20px Arial", fill: "#ffffff", align: "left" });
     this.score = this.game.global.score;
     this.countScore = 0;
+    this.countModeEtoile = 0;
     this.scoreText = this.game.add.text(this.game.width / 2, this.game.height - 30, 'score: ' + this.score, { font: "20px Arial", fill: "#ffffff", align: "left" });
+    this.compteRebour = this.game.add.text(this.game.width / 2, 10, ' ', { font: "20px Arial", fill: "#ffffff", align: "left" });
 
+    this.modeEtoile();
 
   }
   createBalls() {
     this.tabBall = [];
-    
-    for (let i = 0; i < 1; i++) {
+
+    for (let i = 0; i < 10; i++) {
       let ball = new Ball(this.game, this.paddle.x - 8, this.paddle.body.y - 16);
       ball.idGame = (new Date()).getTime();
       this.tabBall.push(ball);
       console.log(ball);
       ball.events.onOutOfBounds.add(this.ballLost, this);
+      
+      
     }
   }
-  lanceBonus(){
-    for (let i = 0; i < 1; i++) {
+  lanceBonus() {
+    for (let i = 0; i < 3; i++) {
       let ball = new Ball(this.game, this.paddle.x - 8, this.paddle.body.y - 16);
       ball.idGame = (new Date()).getTime();
       console.log(ball);
       this.tabBall.push(ball);
+      ball.speed = 450;
 
       ball.events.onOutOfBounds.add(this.ballLost, this);
     }
+    //console.log('bonus');
+    //console.log(this.tabBall)
+  }
+  modeEtoile() {
+    var me = this;
+    setInterval(function interval() {
       console.log('bonus');
-      //console.log(this.tabBall)
+      for (let i = 0; i <= 10; i++) {
+        setTimeout(function () {
+          me.compteRebour.text = 'invincible : ' + me.time;
+          console.log(me.time);
+          return me.time -= 1;
+        }, 1000 * i);
+        me.time = 10;
+      }
+      me.game.physics.arcade.checkCollision.down = true;
+      setTimeout(function () {
+        console.log('fin bonus');
+        me.compteRebour.text = '';
+        me.game.physics.arcade.checkCollision.down = false;
+        for(let x = 0; x < me.tabBall.length; x++){
+          var ball = me.tabBall[x];
+          ball.baisseVitesse();
+        }
+      }, 11000);
+      for(let j = 0; j < me.tabBall.length; j++){
+        var ball = me.tabBall[j];
+        ball.changeVitesse();
+      }
+    }, 20000);
+    
+    //return collisionDown = false;
+
+
   }
   releaseBall(ball, velocityX, velocityY) {
     velocityX = velocityX || -100;
@@ -105,7 +143,7 @@ class Game extends Phaser.State {
       if ((this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) || this.game.input.keyboard.isDown(Phaser.Keyboard.ENTER)) && ball.ballOnPaddle) {
         this.releaseBall(ball);
       }
-    
+
     }
 
 
@@ -115,14 +153,14 @@ class Game extends Phaser.State {
   ballLost(_ball) {
     if (this.tabBall.length > 1) {
       let idGame = _ball.idGame;
-      let ballIndex = this.tabBall.findIndex(function(el){
+      let ballIndex = this.tabBall.findIndex(function (el) {
         return el.idGame === idGame;
       });
       _ball.destroy();
       this.tabBall.splice(ballIndex, 1);
       console.log(this.tabBall);
       //this.tabBall.map(function (_ball, i) {
-        //_ball.idGame = i;
+      //_ball.idGame = i;
       //});
       return
     }
@@ -136,20 +174,23 @@ class Game extends Phaser.State {
   }
 
   changeScore(pt) {
-    
+
     this.countScore += pt;
+    this.countModeEtoile += pt;
 
     this.score += pt;
     this.scoreText.text = 'score: ' + this.score;
-    
-    console.log(this.countScore);
+
+    //console.log(this.countScore);
     //console.log(this.score);
-    if(this.countScore >= 1000){
+    if (this.countScore >= 200) {
       this.lanceBonus();
       return this.countScore = 0;
-      
-      
     }
+    //if(this.countModeEtoile >= 500){
+    //  this.modeEtoile();
+    //  return this.countModeEtoile = 0;
+    //}
 
 
   }
@@ -179,6 +220,12 @@ class Game extends Phaser.State {
       _ball.ballOnPaddle = true;
       _ball.stop(this.paddle);
       this.bricks.callAll('revive');
+      
+      
+      
+
+      
+      
     }
   }
 
