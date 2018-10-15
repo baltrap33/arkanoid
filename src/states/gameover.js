@@ -11,7 +11,10 @@ class Menu extends Phaser.State {
     this.background.width = this.game.world.width;
 
     // add intro text
-    this.gameoverText = this.add.text(this.game.world.centerX,this.game.world.centerY, "Score = "+this.game.global.score, {
+    this.gameoverText = this.add.text(this.game.world.x+150,this.game.world.y+250, "GAME OVER !!!! ",{
+      font: '42px Arial', fill: '#ffffff', align: 'center'
+    });
+    this.gameoverText = this.add.text(this.game.world.centerX,this.game.world.centerY, "Score = "+this.game.global.score +"points", {
       font: '42px Arial', fill: '#ffffff', align: 'center'
     });
     this.gameoverText.anchor.set(0.5);
@@ -29,6 +32,7 @@ class Menu extends Phaser.State {
     if (this.game.global.score > max) {
       localStorage.maxScore = this.game.global.score;
     }
+    this.gameoverText = this.add.text(this.game.world.x +125,this.game.world.y +50, "Meilleur score : "+localStorage.maxScore+" points", {fill :'#ffffff'})
   }
 
   resetGlobalVariables() {

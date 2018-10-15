@@ -61,5 +61,5 @@ class Paddle extends Phaser.Sprite {
       case 'bigPaddle' : this.beBigger(); break;
     }
   }
-}
-export default Paddle;
+ }
+ export default Paddle;

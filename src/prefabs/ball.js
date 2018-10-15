@@ -21,7 +21,7 @@ class Ball extends Phaser.Sprite {
 
     start(vX, vY) {
         if (this.ballOnPaddle) {
-            let angle = 250 + Math.floor(Math.random()*40);
+            let angle = 250 + Math.floor(Math.random() * 40);
             let radian = angle * Math.PI / 180;
             this.ballOnPaddle = false;
             this.body.velocity.y = Math.sin(radian) * this.speed;
@@ -29,8 +29,8 @@ class Ball extends Phaser.Sprite {
             this.animations.play('spin');
         }
     }
-    changeVelocity (){
-        let angle = 250 + Math.floor(Math.random()*40);
+    changeVelocity() {
+        let angle = 250 + Math.floor(Math.random() * 40);
         let radian = angle * Math.PI / 180;
         this.body.velocity.y = Math.sin(radian) * this.speed;
         this.body.velocity.x = Math.cos(radian) * this.speed;
@@ -40,6 +40,24 @@ class Ball extends Phaser.Sprite {
             this.reset(paddle.x + 16, paddle.y - 16);
             this.ballOnPaddle = true;
             this.animations.stop();
+        }
+    }
+    balleAimant() {
+        var me = this;
+        this.inter = setTimeout(function () {
+            me.balleNonAimant();
+        }, 10000);
+
+        this.ballTouchPaddle = true;
+    }
+
+    balleNonAimant() {
+        this.ballTouchPaddle = false;
+    }
+
+    activateBonus(nameBonus) {
+        switch (nameBonus) {
+            case 'balleAimant': this.balleAimant(); break;
         }
     }
 

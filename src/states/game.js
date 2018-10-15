@@ -1,6 +1,7 @@
 import Paddle from '../prefabs/paddle';
 import Ball from '../prefabs/ball';
-import Bonus from '../prefabs/bonus';
+import BonusBigPaddle from '../prefabs/bonusBigPaddle';
+import BonusAimantPaddle from '../prefabs/bonusAimantPaddle';
 
 class Game extends Phaser.State {
 
@@ -9,8 +10,6 @@ class Game extends Phaser.State {
   }
 
   create() {
-
-
     this.background = this.game.add.sprite(0, 0, 'sky');
     this.background.height = this.game.world.height;
     this.background.width = this.game.world.width;
@@ -24,11 +23,11 @@ class Game extends Phaser.State {
     this.bricks.physicsBodyType = Phaser.Physics.ARCADE;
     var wall = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ];
 
@@ -36,11 +35,10 @@ class Game extends Phaser.State {
     for (let y = 0; y < wall.length; y++) {
       var lines = wall[y];
       for (let x = 0; x < lines.length; x++) {
-        (lines[x] == 1) ? (this.createBrick(x, y)) : '';
-        //    for (let r = 0; r < line[x]; r++){
-
-        //   }
-
+        (lines[x] == 1) ? (this.createBrick1(x, y)) : '';
+        (lines[x] == 2) ? (this.createBrick2(x, y)) : '';
+        (lines[x] == 3) ? (this.createBrick3(x, y)) : '';
+        (lines[x] == 4) ? (this.createBrick4(x, y)) : '';
       }
     }
 
@@ -56,8 +54,24 @@ class Game extends Phaser.State {
     this.ball.events.onOutOfBounds.add(this.ballLost, this);
   }
 
-  createBrick(x, y) {
-    var brick = this.bricks.create(30 + (x * 36), 100 + (y * 52), 'breakout', 'brick_4_1.png');
+
+  createBrick1(x, y) {
+    var brick = this.bricks.create(30 + (x * 36), 100 + (y * 15), 'breakout', 'brick_1_1.png');
+    brick.body.bounce.set(1);
+    brick.body.immovable = true;
+  }
+  createBrick2(x, y) {
+    var brick = this.bricks.create(30 + (x * 36), 100 + (y * 15), 'breakout', 'brick_2_1.png');
+    brick.body.bounce.set(1);
+    brick.body.immovable = true;
+  }
+  createBrick3(x, y) {
+    var brick = this.bricks.create(30 + (x * 36), 100 + (y * 15), 'breakout', 'brick_3_1.png');
+    brick.body.bounce.set(1);
+    brick.body.immovable = true;
+  }
+  createBrick4(x, y) {
+    var brick = this.bricks.create(30 + (x * 36), 100 + (y * 15), 'breakout', 'brick_4_1.png');
     brick.body.bounce.set(1);
     brick.body.immovable = true;
   }
@@ -69,7 +83,6 @@ class Game extends Phaser.State {
   }
 
   update() {
-    //this.ballBonusPaddle(this.ball, this.bonus );
     if (this.ball.ballOnPaddle) {
       this.ball.body.x = this.paddle.x - 8;
       this.ball.body.y = this.paddle.body.y - 16;
@@ -103,6 +116,13 @@ class Game extends Phaser.State {
   }
 
   ballHitPaddle(_ball, _paddle) {
+
+
+    if (_ball.ballTouchPaddle) {
+      _ball.ballOnPaddle = true;
+    }
+
+
     var diff = 0;
     if (_ball.x < _paddle.x) {
       diff = _paddle.x - _ball.x;
@@ -118,11 +138,13 @@ class Game extends Phaser.State {
       this.changeScore(3);
     }
   }
+
   ballHitBrick(_ball, _brick) {
     var bonus;
     let randomise = Math.floor(Math.random() * 50) < 5;
     if (randomise) {
-      bonus = new Bonus(this.game, _brick.x, _brick.y);
+      let randomise2 = Math.floor(Math.random() * 50) < 25;
+      bonus = randomise2 ? new BonusAimantPaddle(this.game, _brick.x, _brick.y) : new BonusBigPaddle(this.game, _brick.x, _brick.y);
       this.bonuses.push(bonus);
     }
     _brick.kill();
@@ -137,7 +159,11 @@ class Game extends Phaser.State {
   }
 
   bonusHitPaddle(_paddle, _bonus) {
-    _paddle.activateBonus('bigPaddle');
+    let type = _bonus.getType();
+    switch (type) {
+      case 'BonusBigPaddle': _paddle.activateBonus('bigPaddle'); break;
+      case 'BonusAimantPaddle': this.ball.activateBonus('balleAimant'); break;
+    }
     _bonus.destroy();
   }
 
