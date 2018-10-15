@@ -1,10 +1,14 @@
 import Paddle from '../prefabs/paddle';
 import Ball from '../prefabs/ball';
+import Ennemi from '../prefabs/ennemi';
+
 
 class Game extends Phaser.State {
 
   constructor() {
     super();
+
+
   }
 
   create() {
@@ -20,31 +24,70 @@ class Game extends Phaser.State {
     this.bricks = this.game.add.group();
     this.bricks.enableBody = true;
     this.bricks.physicsBodyType = Phaser.Physics.ARCADE;
-    var brick;
-    for (let y = 0; y < 4; y++) {
-      for (let x = 0; x < 15; x++) {
-        brick = this.bricks.create(30 + (x * 36), 100 + (y * 52), 'breakout', 'brick_' + (y + 1) + '_1.png');
-        brick.body.bounce.set(1);
-        brick.body.immovable = true;
+
+    var tabBrick = [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+      [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+      [0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0],
+      [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
+    ];
+
+    for (let y = 0; y < tabBrick.length; y++) {
+      let ligne = tabBrick[y];
+      for (let x = 0; x < ligne.length; x++) {
+        let caz = ligne[x];
+        (caz == 1) ? this.createBrick(y, x) : '';
       }
     }
-
 
     this.paddle = new Paddle(this.game, (this.game.world.width) / 2, (this.game.world.height - 42));
     this.ball = new Ball(this.game, this.paddle.x - 8, this.paddle.body.y - 16);
 
-    this.lives = 3;
+
+    this.lives = 5;
     this.livesText = this.game.add.text(25, this.game.height - 30, 'vies: ' + this.lives, { font: "20px Arial", fill: "#ffffff", align: "left" });
     this.score = this.game.global.score;
+
     this.scoreText = this.game.add.text(this.game.width / 2, this.game.height - 30, 'score: ' + this.score, { font: "20px Arial", fill: "#ffffff", align: "left" });
 
     this.ball.events.onOutOfBounds.add(this.ballLost, this);
+  }
+
+
+  createBrick(y, x) {
+    var brick;
+    if (y < 2) {
+      brick = this.bricks.create(30 + (x * 36), 100 + (y * 52), 'breakout', 'brick_' + '2' + '_1.png');
+    } else if (2 <= y && y < 4) {
+      brick = this.bricks.create(30 + (x * 36), 100 + (y * 52), 'breakout', 'brick_' + '3' + '_1.png');
+    } else if (4 <= y && y < 6) {
+      brick = this.bricks.create(30 + (x * 36), 100 + (y * 52), 'breakout', 'brick_' + '4' + '_1.png');
+    } else {
+      brick = this.bricks.create(30 + (x * 36), 100 + (y * 52), 'breakout', 'brick_' + '1' + '_1.png');
+    }
+
+    brick.body.bounce.set(1);
+    brick.body.immovable = true;
   }
 
   releaseBall(velocityX, velocityY) {
     velocityX = velocityX || -100;
     velocityY = velocityY || -400;
     this.ball.start(velocityX, velocityY);
+  }
+
+  createEnnemies(nbEnnemis) {
+    this.ennemies = [];
+    var ceGame = this.game;
+    this.nbEnnemis = nbEnnemis;
+    !nbEnnemis ? nbEnnemis = 2 : nbEnnemis;
+    for (let i = 0; i < nbEnnemis; i++) {
+      this.ennemies.push(new Ennemi(ceGame, (400 / (i + 1)), (150 + (i * 15))));
+    }
   }
 
   update() {
@@ -58,10 +101,15 @@ class Game extends Phaser.State {
 
     this.game.physics.arcade.collide(this.ball, this.bricks, this.ballHitBrick, null, this);
 
+    for (let i = 0; i < this.nbEnnemis; i++) {
+      this.game.physics.arcade.collide(this.ball, this.ennemies[i]);
+    }
+
     if ((this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) || this.game.input.keyboard.isDown(Phaser.Keyboard.ENTER)) && this.ball.ballOnPaddle) {
       this.releaseBall();
     }
   }
+
 
   ballLost() {
     this.ball.stop(this.paddle);
@@ -76,6 +124,9 @@ class Game extends Phaser.State {
   changeScore(pt) {
     this.score += pt;
     this.scoreText.text = 'score: ' + this.score;
+    if(this.score >= 40 && !this.ennemies){
+      this.createEnnemies(3);
+    }
   }
 
   ballHitPaddle(_ball, _paddle) {
@@ -106,8 +157,10 @@ class Game extends Phaser.State {
     }
   }
 
+
   endGame() {
     this.game.global.score = this.score;
+    this.ennemies = !this.ennemies;
     this.game.state.start('gameover');
   }
 

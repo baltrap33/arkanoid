@@ -7,7 +7,7 @@ class Ball extends Phaser.Sprite {
         this.scale.set(1.1);
         this.anchor.set(0.5);
         // speed 400 easy // 750 hard
-        this.speed = 450;
+        this.speed = 400;
 
         this.checkWorldBounds = true;
         this.game.physics.enable(this, Phaser.Physics.ARCADE);
