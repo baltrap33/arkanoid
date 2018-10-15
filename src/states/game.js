@@ -20,12 +20,19 @@ class Game extends Phaser.State {
     this.bricks = this.game.add.group();
     this.bricks.enableBody = true;
     this.bricks.physicsBodyType = Phaser.Physics.ARCADE;
-    var brick;
-    for (let y = 0; y < 4; y++) {
-      for (let x = 0; x < 15; x++) {
-        brick = this.bricks.create(30 + (x * 36), 100 + (y * 52), 'breakout', 'brick_' + (y + 1) + '_1.png');
-        brick.body.bounce.set(1);
-        brick.body.immovable = true;
+    var tabBrick = [
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ];
+
+    for (let y = 0; y < tabBrick.length; y++) {
+      var lines = tabBrick[y];
+      for (let x = 0; x < lines.length; x++) {
+        (lines[x] == 1) ? this.createBricks(y, x) : '';
       }
     }
 
@@ -38,7 +45,20 @@ class Game extends Phaser.State {
     this.score = this.game.global.score;
     this.scoreText = this.game.add.text(this.game.width / 2, this.game.height - 30, 'score: ' + this.score, { font: "20px Arial", fill: "#ffffff", align: "left" });
 
+
+    this.lazers = this.game.add.group();
+    this.lazers.enableBody = true;
+    this.lazers.physicsBodyType = Phaser.Physics.ARCADE;
+    this.lazers.createMultiple(1000, 'bullet');
+    this.fireButton = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.bulletTime = 0;
+
     this.ball.events.onOutOfBounds.add(this.ballLost, this);
+  }
+  createBricks(y, x) {
+    var brick = this.bricks.create(30 + (x * 36), 100 + (y * 25), 'breakout', 'brick_4_1.png');
+    brick.body.bounce.set(1);
+    brick.body.immovable = true;
   }
 
   releaseBall(velocityX, velocityY) {
@@ -53,6 +73,21 @@ class Game extends Phaser.State {
       this.ball.body.x = this.paddle.x - 8;
       this.ball.body.y = this.paddle.body.y - 16;
     }
+    if (this.bricks.countLiving() == 0) {
+      if (this.fireButton.isDown && !this.ball.ballOnPaddle) {
+
+
+      }
+
+
+    }
+
+
+
+
+    this.game.physics.arcade.overlap(this.lazers, this.bricks, this.bulletHitBricks, null, this);
+    //this.lazers.forEachAlive(this.updateBullets, this);
+
 
     this.game.physics.arcade.collide(this.ball, this.paddle, this.ballHitPaddle, null, this);
 
@@ -60,9 +95,48 @@ class Game extends Phaser.State {
 
     if ((this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) || this.game.input.keyboard.isDown(Phaser.Keyboard.ENTER)) && this.ball.ballOnPaddle) {
       this.releaseBall();
+
+
     }
   }
 
+  shootingBullet() {
+    var tir = this;
+    var spamShoot = setInterval(function () {
+      tir.fireBullet();
+    }, 75);
+    this.inter = null;
+    this.inter = setTimeout(function () {
+      clearInterval(spamShoot);
+    }, 5000)
+  }
+  fireBullet() {
+
+    if (this.game.time.now > this.bulletTime) {
+      let lazer;
+
+      lazer = this.lazers.getFirstExists(false);
+
+
+      if (lazer) {
+        lazer.reset(this.paddle.x, this.paddle.y);
+        lazer.body.velocity.y = -400;
+        this.bulletTime = this.game.time.now + 200;
+      }
+
+    }
+  }
+
+  bulletHitBricks(lazer, bricks) {
+    lazer.kill();
+    bricks.kill();
+    this.changeScore(30);
+
+  }
+
+  updateBullets(lazer) {
+    lazer.kill();
+  }
   ballLost() {
     this.ball.stop(this.paddle);
     this.paddle.setSpeed(7);
@@ -90,8 +164,8 @@ class Game extends Phaser.State {
       _ball.body.velocity.x = 2 + Math.random() * 8;
     }
     if (!this.ball.ballOnPaddle) {
-      _paddle.increaseSpeed(0.5);
-      this.changeScore(3);
+      _paddle.increaseSpeed(1.1);
+      this.changeScore(10);
     }
   }
   ballHitBrick(_ball, _brick) {
@@ -99,6 +173,7 @@ class Game extends Phaser.State {
     this.changeScore(10);
     if (this.bricks.countLiving() == 0) {
       this.changeScore(1000);
+      this.shootingBullet();
       this.lives += 1;
       this.ball.ballOnPaddle = true;
       this.ball.stop(this.paddle);

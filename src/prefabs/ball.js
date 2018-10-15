@@ -17,6 +17,7 @@ class Ball extends Phaser.Sprite {
         this.animations.add('spin', ['ball_1.png', 'ball_2.png', 'ball_3.png', 'ball_4.png', 'ball_5.png'], 50, true, false);
         this.game.add.existing(this);
         this.ballOnPaddle = true;
+        
     }
 
     start(vX, vY) {
@@ -26,7 +27,7 @@ class Ball extends Phaser.Sprite {
             this.ballOnPaddle = false;
             this.body.velocity.y = Math.sin(radian) * this.speed;
             this.body.velocity.x = Math.cos(radian) * this.speed;
-            this.animations.play('spin');
+            this.animations.play('spin');   
         }
     }
     changeVelocity (){

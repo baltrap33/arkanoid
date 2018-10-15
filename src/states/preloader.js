@@ -18,10 +18,12 @@ class Preloader extends Phaser.State {
 
   loadResources() {
     this.game.load.atlas('breakout','assets/breakout.png','assets/breakout.json');
+    this.game.load.image('bullet','assets/bullet22.png');
     this.game.load.image('sky', 'assets/starfield.jpg');
     this.game.load.image('paddle', 'assets/paddle.png');
-    
     this.game.load.image('ball', 'assets/ball.png');
+    this.game.load.image('ennemy', 'assets/fishie.png');
+
   }
 
   onLoadComplete() {
