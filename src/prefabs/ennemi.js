@@ -1,7 +1,7 @@
 class Ennemi extends Phaser.Sprite {
     constructor(game, x, y, frame) {
         
-        super(game, x, y, 'breakout', 'paddle_big.png');
+        super(game, x, y, 'ennemis');
 
         // set size
         this.scale.set(1.5, 1.5);
@@ -30,7 +30,7 @@ class Ennemi extends Phaser.Sprite {
     }
     
     calcCoord() {
-        if (this.x + this.Vx < 0 + 5 || this.x + this.Vx > this.game.world.width - 75) {
+        if (this.x + this.Vx < 0 + 5 || this.x + this.Vx > this.game.world.width - 100) {
             this.Vx = -this.Vx;
         }
         if (this.y + this.Vy < 150 || this.y + this.Vy > this.game.world.height - 300) {

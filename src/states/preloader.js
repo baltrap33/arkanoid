@@ -1,3 +1,5 @@
+import { ENGINE_METHOD_DIGESTS } from "constants";
+
 class Preloader extends Phaser.State {
 
   constructor() {
@@ -18,6 +20,7 @@ class Preloader extends Phaser.State {
 
   loadResources() {
     this.game.load.atlas('breakout','assets/breakout.png','assets/breakout.json');
+    this.game.load.image('ennemis','assets/ennemis.png');
     this.game.load.image('sky', 'assets/starfield.jpg');
     this.game.load.image('paddle', 'assets/paddle.png');
     
