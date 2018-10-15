@@ -21,50 +21,112 @@ class Game extends Phaser.State {
     this.bricks.enableBody = true;
     this.bricks.physicsBodyType = Phaser.Physics.ARCADE;
     var brick;
-    for (let y = 0; y < 4; y++) {
+    /*for (let y = 0; y < 4; y++) {
       for (let x = 0; x < 15; x++) {
         brick = this.bricks.create(30 + (x * 36), 100 + (y * 52), 'breakout', 'brick_' + (y + 1) + '_1.png');
         brick.body.bounce.set(1);
         brick.body.immovable = true;
       }
+    }*/
+    var tabBrick = [[1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1],
+                    [0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0],
+                    [0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0],
+                    [0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0],
+                    [1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1]];
+
+
+    for (let i = 0; i < tabBrick.length; i++) {
+      var ligne = tabBrick[i]
+      for (let l = 0; l < ligne.length; l++) {
+        var nb = ligne[l];
+        if (nb === 1) {
+          brick = this.bricks.create(10 + (l * 36), 100 + (i * 52), 'breakout', 'brick_' + '1' + '_1.png');
+          brick.body.bounce.set(1);
+          brick.body.immovable = true;
+        }
+      }
     }
 
 
     this.paddle = new Paddle(this.game, (this.game.world.width) / 2, (this.game.world.height - 42));
-    this.ball = new Ball(this.game, this.paddle.x - 8, this.paddle.body.y - 16);
+    
+   
+    this.createBalls();
+    //this.ball = new Ball(this.game, this.paddle.x - 8, this.paddle.body.y - 16);
 
     this.lives = 3;
     this.livesText = this.game.add.text(25, this.game.height - 30, 'vies: ' + this.lives, { font: "20px Arial", fill: "#ffffff", align: "left" });
     this.score = this.game.global.score;
+    this.countScore = 0;
     this.scoreText = this.game.add.text(this.game.width / 2, this.game.height - 30, 'score: ' + this.score, { font: "20px Arial", fill: "#ffffff", align: "left" });
 
-    this.ball.events.onOutOfBounds.add(this.ballLost, this);
-  }
 
-  releaseBall(velocityX, velocityY) {
+  }
+  createBalls() {
+    this.tabBall = [];
+    
+    for (let i = 0; i < 1; i++) {
+      let ball = new Ball(this.game, this.paddle.x - 8, this.paddle.body.y - 16);
+      ball.idGame = (new Date()).getTime();
+      this.tabBall.push(ball);
+      console.log(ball);
+      ball.events.onOutOfBounds.add(this.ballLost, this);
+    }
+  }
+  lanceBonus(){
+    for (let i = 0; i < 1; i++) {
+      let ball = new Ball(this.game, this.paddle.x - 8, this.paddle.body.y - 16);
+      ball.idGame = (new Date()).getTime();
+      console.log(ball);
+      this.tabBall.push(ball);
+
+      ball.events.onOutOfBounds.add(this.ballLost, this);
+    }
+      console.log('bonus');
+      //console.log(this.tabBall)
+  }
+  releaseBall(ball, velocityX, velocityY) {
     velocityX = velocityX || -100;
     velocityY = velocityY || -400;
-    this.ball.start(velocityX, velocityY);
+    ball.start(velocityX, velocityY);
   }
 
   update() {
+    for (let i = 0; i < this.tabBall.length; i++) {
+      let ball = this.tabBall[i];
+      if (ball.ballOnPaddle) {
+        ball.body.x = this.paddle.x - 8;
+        ball.body.y = this.paddle.body.y - 16;
+      }
+      this.game.physics.arcade.collide(ball, this.paddle, this.ballHitPaddle, null, this);
 
-    if (this.ball.ballOnPaddle) {
-      this.ball.body.x = this.paddle.x - 8;
-      this.ball.body.y = this.paddle.body.y - 16;
+      this.game.physics.arcade.collide(ball, this.bricks, this.ballHitBrick, null, this);
+
+      if ((this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) || this.game.input.keyboard.isDown(Phaser.Keyboard.ENTER)) && ball.ballOnPaddle) {
+        this.releaseBall(ball);
+      }
+    
     }
 
-    this.game.physics.arcade.collide(this.ball, this.paddle, this.ballHitPaddle, null, this);
 
-    this.game.physics.arcade.collide(this.ball, this.bricks, this.ballHitBrick, null, this);
 
-    if ((this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) || this.game.input.keyboard.isDown(Phaser.Keyboard.ENTER)) && this.ball.ballOnPaddle) {
-      this.releaseBall();
-    }
   }
 
-  ballLost() {
-    this.ball.stop(this.paddle);
+  ballLost(_ball) {
+    if (this.tabBall.length > 1) {
+      let idGame = _ball.idGame;
+      let ballIndex = this.tabBall.findIndex(function(el){
+        return el.idGame === idGame;
+      });
+      _ball.destroy();
+      this.tabBall.splice(ballIndex, 1);
+      console.log(this.tabBall);
+      //this.tabBall.map(function (_ball, i) {
+        //_ball.idGame = i;
+      //});
+      return
+    }
+    _ball.stop(this.paddle);
     this.paddle.setSpeed(7);
     this.lives -= 1;
     this.livesText.text = 'vies: ' + this.lives;
@@ -74,8 +136,22 @@ class Game extends Phaser.State {
   }
 
   changeScore(pt) {
+    
+    this.countScore += pt;
+
     this.score += pt;
     this.scoreText.text = 'score: ' + this.score;
+    
+    console.log(this.countScore);
+    //console.log(this.score);
+    if(this.countScore >= 1000){
+      this.lanceBonus();
+      return this.countScore = 0;
+      
+      
+    }
+
+
   }
 
   ballHitPaddle(_ball, _paddle) {
@@ -89,7 +165,7 @@ class Game extends Phaser.State {
     } else {
       _ball.body.velocity.x = 2 + Math.random() * 8;
     }
-    if (!this.ball.ballOnPaddle) {
+    if (!_ball.ballOnPaddle) {
       _paddle.increaseSpeed(0.5);
       this.changeScore(3);
     }
@@ -100,8 +176,8 @@ class Game extends Phaser.State {
     if (this.bricks.countLiving() == 0) {
       this.changeScore(1000);
       this.lives += 1;
-      this.ball.ballOnPaddle = true;
-      this.ball.stop(this.paddle);
+      _ball.ballOnPaddle = true;
+      _ball.stop(this.paddle);
       this.bricks.callAll('revive');
     }
   }
