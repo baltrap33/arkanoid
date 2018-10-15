@@ -15,6 +15,8 @@ class Paddle extends Phaser.Sprite {
     this.body.bounce.set(1);
     this.body.immovable = true;
     this.game.add.existing(this);
+
+    this.inter = null;
   }
 
   setSpeed (speed){
@@ -41,6 +43,23 @@ class Paddle extends Phaser.Sprite {
   goRight() {
     this.x += this.speed;
   }
-}
 
+  beBigger(){
+    var me = this;
+    this.inter = setTimeout(function(){
+      me.beNormal();
+    }, 10000);
+    this.scale.set(2);
+  }
+
+  beNormal(){
+    this.scale.set(1.6);
+  }
+
+  activateBonus(nameBonus){
+    switch(nameBonus){
+      case 'bigPaddle' : this.beBigger(); break;
+    }
+  }
+}
 export default Paddle;
