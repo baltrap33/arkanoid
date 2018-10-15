@@ -30,10 +30,10 @@ class Ennemi extends Phaser.Sprite {
     }
     
     calcCoord() {
-        if (this.x + this.Vx < 0 + 5 || this.x + this.Vx > this.game.world.width - 70) {
+        if (this.x + this.Vx < 0 + 5 || this.x + this.Vx > this.game.world.width - 75) {
             this.Vx = -this.Vx;
         }
-        if (this.y + this.Vy < 150 || this.y + this.Vy > this.game.world.width - 70) {
+        if (this.y + this.Vy < 150 || this.y + this.Vy > this.game.world.height - 300) {
             this.Vy = -this.Vy;
         }
         this.x += this.Vx;

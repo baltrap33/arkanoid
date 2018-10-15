@@ -25,6 +25,9 @@ class Game extends Phaser.State {
     this.bricks.enableBody = true;
     this.bricks.physicsBodyType = Phaser.Physics.ARCADE;
 
+    this.ennemies = [];
+    this.createEnnemies(1);
+    
     var tabBrick = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
@@ -51,10 +54,11 @@ class Game extends Phaser.State {
     this.lives = 5;
     this.livesText = this.game.add.text(25, this.game.height - 30, 'vies: ' + this.lives, { font: "20px Arial", fill: "#ffffff", align: "left" });
     this.score = this.game.global.score;
+    this.countScore = 0;
 
     this.scoreText = this.game.add.text(this.game.width / 2, this.game.height - 30, 'score: ' + this.score, { font: "20px Arial", fill: "#ffffff", align: "left" });
 
-    this.ball.events.onOutOfBounds.add(this.ballLost, this);
+    this.ball.events.onOutOfBounds.add(this.ballLost, this);  
   }
 
 
@@ -81,12 +85,10 @@ class Game extends Phaser.State {
   }
 
   createEnnemies(nbEnnemis) {
-    this.ennemies = [];
-    var ceGame = this.game;
     this.nbEnnemis = nbEnnemis;
     !nbEnnemis ? nbEnnemis = 2 : nbEnnemis;
     for (let i = 0; i < nbEnnemis; i++) {
-      this.ennemies.push(new Ennemi(ceGame, (400 / (i + 1)), (150 + (i * 15))));
+      this.ennemies.push(new Ennemi(this.game, (400 / (i + 1)), (150 + (i * 15))));
     }
   }
 
@@ -101,9 +103,12 @@ class Game extends Phaser.State {
 
     this.game.physics.arcade.collide(this.ball, this.bricks, this.ballHitBrick, null, this);
 
-    for (let i = 0; i < this.nbEnnemis; i++) {
-      this.game.physics.arcade.collide(this.ball, this.ennemies[i]);
+    if (this.ennemies){
+      for (let i = 0; i < this.ennemies.length; i++) {
+        this.game.physics.arcade.collide(this.ball, this.ennemies[i]);
+      }
     }
+    
 
     if ((this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) || this.game.input.keyboard.isDown(Phaser.Keyboard.ENTER)) && this.ball.ballOnPaddle) {
       this.releaseBall();
@@ -123,9 +128,11 @@ class Game extends Phaser.State {
 
   changeScore(pt) {
     this.score += pt;
+    this.countScore += pt;
     this.scoreText.text = 'score: ' + this.score;
-    if(this.score >= 40 && !this.ennemies){
-      this.createEnnemies(3);
+    if(this.countScore >= 500 && this.ennemies.length < 5){
+      this.createEnnemies();
+      this.countScore = 0;
     }
   }
 
